@@ -1,0 +1,24 @@
+{
+  "name": "codecraft-socket",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "~4.10.6",
+    "body-parser": "~1.10.1",
+    "cookie-parser": "~1.3.3",
+    "morgan": "~1.5.1",
+    "serve-favicon": "~2.2.0",
+    "debug": "~2.1.1",
+    "jade": "~1.8.2",
+    "stylus": "0.42.3",
+    "socket.io": "~1.3.3",
+    "browserify": "~9.0.3",
+    "watchify": "~2.4.0",
+    "underscore": "~1.8.3",
+    "passport-openid": "~0.3.1",
+    "passport": "~0.2.1"
+  }
+}
