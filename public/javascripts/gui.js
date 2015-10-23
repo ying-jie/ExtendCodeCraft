@@ -1502,7 +1502,6 @@ IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
     button.fixLayout();
     shareBoxSettingsButton = button;
 
-
     // add member button
     button = new PushButtonMorph(
         this,
@@ -1518,12 +1517,28 @@ IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
     button.fixLayout();
     shareBoxAddMemberButton = button;
 
+    // post annoucement button
+    button = new PushButtonMorph(
+        this,
+        'createAnnouncementPopup',
+        (String.fromCharCode("0xf14b")),
+        null,
+        null,
+        null,
+        "iconButton"
+    );
+    button.drawNew();
+    button.hint = 'New Announcement'
+    button.fixLayout();
+    newAnnouncementButton = button;
 
     // add to title bar
     this.shareBoxTitleBarButtons.add(shareBoxSettingsButton);
     this.shareBoxTitleBarButtons.shareBoxSettingsButton = shareBoxSettingsButton;
     this.shareBoxTitleBarButtons.add(shareBoxAddMemberButton);
     this.shareBoxTitleBarButtons.shareBoxAddMemberButton = shareBoxAddMemberButton;
+    this.shareBoxTitleBarButtons.add(newAnnouncementButton);
+    this.shareBoxTitleBarButtons.newAnnouncementButton = newAnnouncementButton;
 
     // position buttons
     if (this.shareBoxTitleBarButtons) {
@@ -1534,6 +1549,10 @@ IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
         // position settings button
         this.shareBoxTitleBarButtons.shareBoxSettingsButton.setTop(this.shareBoxTitleBarButtons.top() + 2);
         this.shareBoxTitleBarButtons.shareBoxSettingsButton.setLeft(this.shareBoxTitleBarButtons.shareBoxAddMemberButton.right());
+
+        // position post announcement button
+        this.shareBoxTitleBarButtons.newAnnouncementButton.setTop(this.shareBoxTitleBarButtons.top() + 2);
+        this.shareBoxTitleBarButtons.newAnnouncementButton.setLeft(this.shareBoxTitleBarButtons.shareBoxSettingsButton.right());
     }
 
     this.fixLayout();
@@ -2949,7 +2968,6 @@ IDE_Morph.prototype.showAddMemberPopup = function() {
         var username = usernameInput.getValue();
         var txtColor = new Color(204, 0, 0);
 
-
         if (username.length < 5) {
             // show error message for blank username
             if (this.txt) {
@@ -3007,6 +3025,149 @@ IDE_Morph.prototype.showAddMemberPopup = function() {
     this.addMemberPopup.fixLayout();
     this.addMemberPopup.popUp(world);
 };
+
+
+
+
+
+
+
+// yiran: Popup when creator chooses "Post New Announcement"
+IDE_Morph.prototype.createAnnouncementPopup = function() {
+    var world = this.world();
+    var myself = this;
+    var popupWidth = 400;
+    var popupHeight = 400;
+
+    if (this.newAnnouncementPopup) {
+        this.newAnnouncementPopup.destroy();
+    }
+    this.newAnnouncementPopup = new DialogBoxMorph();
+    this.newAnnouncementPopup.setExtent(new Point(popupWidth, popupHeight));
+
+    // close dialog button
+    button = new PushButtonMorph(
+        this,
+        null,
+        (String.fromCharCode("0xf00d")),
+        null,
+        null,
+        null,
+        "redCircleIconButton"
+    );
+
+    button.setRight(this.newAnnouncementPopup.right() - 3);
+    button.setTop(this.newAnnouncementPopup.top() + 2);
+    button.action = function () { myself.newAnnouncementPopup.cancel(); };
+    button.drawNew();
+    button.fixLayout();
+    this.newAnnouncementPopup.add(button);
+
+    // the Announcement Title input box
+    var announcementTitle = new InputFieldMorph();
+    announcementTitle.setWidth(200);
+    announcementTitle.setCenter(myself.newAnnouncementPopup.center());
+    announcementTitle.setTop(myself.newAnnouncementPopup.top() + 50);
+    announcementTitle.fontSize = 15;
+    announcementTitle.typeInPadding = 4;
+    announcementTitle.fixLayout();
+    announcementTitle.drawNew();
+    this.newAnnouncementPopup.add(announcementTitle);
+
+    // the Announcement Content input box
+    var announcementContent = new InputFieldMorph();
+    announcementContent.setWidth(200);
+    announcementContent.silentSetHeight(150);
+    announcementContent.setCenter(myself.newAnnouncementPopup.center());
+    announcementContent.setTop(announcementTitle.bottom() + 10);
+    announcementContent.fontSize = 15;
+    announcementContent.typeInPadding = 4;
+    announcementContent.fixLayout();
+    announcementContent.drawNew();
+    this.newAnnouncementPopup.add(announcementContent);
+
+    // "Add" Button
+    postButton = new PushButtonMorph(null, null, "Post this Announcement", null, null, null, "green");
+    postButton.setCenter(myself.newAnnouncementPopup.center());
+    postButton.setTop(announcementContent.bottom() + 20);
+    postButton.action = function () {
+        // get the username from the input
+        var title = announcementTitle.getValue();
+        var content = announcementContent.getValue();
+        var txtColor = new Color(204, 0, 0);
+
+
+        if (title.length < 5) {
+            // show error message for blank username
+            if (this.txt) {
+                this.txt.destroy();
+            }
+            this.txt = new TextMorph("Usernames are at least 5 characters.");
+            this.txt.setColor(txtColor);
+            this.txt.setCenter(myself.newAnnouncementPopup.center());
+            this.txt.setTop(postButton.bottom() + 20);
+            myself.newAnnouncementPopup.add(this.txt);
+            this.txt.drawNew();
+            myself.newAnnouncementPopup.fixLayout();
+            myself.newAnnouncementPopup.drawNew();
+
+        } else if (title.length > 20) {
+
+            // show error message for long username
+            if (this.txt) {
+                this.txt.destroy();
+            }
+            this.txt = new TextMorph("Usernames can't exceed 20 characters.");
+            this.txt.setColor(txtColor);
+            this.txt.setCenter(myself.newAnnouncementPopup.center());
+            this.txt.setTop(postButton.bottom() + 20);
+            myself.newAnnouncementPopup.add(this.txt);
+            this.txt.drawNew();
+            myself.newAnnouncementPopup.fixLayout();
+            myself.newAnnouncementPopup.drawNew();
+
+        } else {
+            // add member to pending members, and feedback result to the user (success/fail)
+            // this result value is returned from an internal add member function (NOT ADDED YET)
+            //var result = "group_full"; // EITHER: success, connection_error, user_offline, user_nonexistent, user_has_group, group_full
+
+            var result = "success"
+            if (result === "success") {
+                socketData = { room: myself.shareboxId, title: title, content: content};
+                myself.sharer.socket.emit('NEW_ANNOUNCEMENT', { room: myself.shareboxId, title: title, content: content, ownerId: tempIdentifier});
+                console.log("[SOCKET-SEND] NEW_ANNOUNCEMENT: " + JSON.stringify(socketData));
+                myself.newAnnouncementPopup.cancel();
+                //myself.showAddMemberSuccessPopup(username);
+            } else { // return result as any of the following:
+                myself.showAddMemberFailurePopup(username, result);
+            }
+        }
+    };
+    this.newAnnouncementPopup.add(postButton);
+
+    // add title
+    this.newAnnouncementPopup.labelString = "Post an Annoucement";
+    this.newAnnouncementPopup.createLabel();
+
+    // popup
+    this.newAnnouncementPopup.drawNew();
+    this.newAnnouncementPopup.fixLayout();
+    this.newAnnouncementPopup.popUp(world);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // notifies the user that new member has been added successfully.
 IDE_Morph.prototype.showAddMemberSuccessPopup = function(username) {
@@ -4627,7 +4788,7 @@ IDE_Morph.prototype.fixLayout = function (situation) {
     var shareBoxInternalLeftPadding = 6;
 
     // heights and widths
-    var shareBoxTitleBarButtonsWidth = 90;
+    var shareBoxTitleBarButtonsWidth = 150;
     var shareBoxTitleBarHeight = 30;
     var corralBarHeight = 90;
 
