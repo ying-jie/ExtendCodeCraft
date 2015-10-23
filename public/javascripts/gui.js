@@ -3137,7 +3137,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
                 myself.sharer.socket.emit('NEW_ANNOUNCEMENT', { room: myself.shareboxId, title: title, content: content, ownerId: tempIdentifier});
                 console.log("[SOCKET-SEND] NEW_ANNOUNCEMENT: " + JSON.stringify(socketData));
                 myself.newAnnouncementPopup.cancel();
-                //myself.showAddMemberSuccessPopup(username);
+                myself.showNewAnnouncementSuccessPopup(title);
             } else { // return result as any of the following:
                 myself.showAddMemberFailurePopup(username, result);
             }
@@ -3160,7 +3160,84 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
 
 
 
+// notifies the owner that new announcement has been posted successfully.
+IDE_Morph.prototype.showNewAnnouncementSuccessPopup = function(title) {
+    var world = this.world();
+    var myself = this;
+    var popupWidth = 400;
+    var popupHeight = 330;
 
+    if (this.newAnnouncementSuccessPopup) {
+        this.newAnnouncementSuccessPopup.destroy();
+    }
+    if (this.viewMembersPopup) {
+        this.viewMembersPopup.destroy();
+    }
+
+    this.newAnnouncementSuccessPopup = new DialogBoxMorph();
+    this.newAnnouncementSuccessPopup.setExtent(new Point(popupWidth, popupHeight));
+
+    // close dialog button
+    button = new PushButtonMorph(
+        this,
+        null,
+        (String.fromCharCode("0xf00d")),
+        null,
+        null,
+        null,
+        "redCircleIconButton"
+    );
+    button.setRight(this.newAnnouncementSuccessPopup.right() - 3);
+    button.setTop(this.newAnnouncementSuccessPopup.top() + 2);
+    button.action = function () { myself.newAnnouncementSuccessPopup.cancel(); };
+    button.drawNew();
+    button.fixLayout();
+    this.newAnnouncementSuccessPopup.add(button);
+
+    // add title
+    this.newAnnouncementSuccessPopup.labelString = title + " posted!";
+    this.newAnnouncementSuccessPopup.createLabel();
+
+    // success image
+    var successImage = new Morph();
+    successImage.texture = 'images/success.png';
+    successImage.drawNew = function () {
+        this.image = newCanvas(this.extent());
+        var context = this.image.getContext('2d');
+        var picBgColor = myself.newAnnouncementSuccessPopup.color;
+        context.fillStyle = picBgColor.toString();
+        context.fillRect(0, 0, this.width(), this.height());
+        if (this.texture) {
+            this.drawTexture(this.texture);
+        }
+    };
+
+    successImage.setExtent(new Point(128, 128));
+    successImage.setCenter(this.newAnnouncementSuccessPopup.center());
+    successImage.setTop(this.newAnnouncementSuccessPopup.top() + 40);
+    this.newAnnouncementSuccessPopup.add(successImage);
+
+    // success message
+    txt = new TextMorph("You've sent the announcement: " + title + " to all group members. \n\n You will receive notification once all members \nhave read the announcement.");
+    txt.setWidth(300);
+    txt.setCenter(this.newAnnouncementSuccessPopup.center());
+    txt.setTop(successImage.bottom() + 20);
+    this.newAnnouncementSuccessPopup.add(txt);
+    txt.drawNew();
+
+    // "got it!" button, closes the dialog.
+    okButton = new PushButtonMorph(null, null, "Got it!", null, null, null, "green");
+    okButton.setCenter(this.newAnnouncementSuccessPopup.center());
+    okButton.setBottom(this.newAnnouncementSuccessPopup.bottom() - 10);
+    okButton.action = function() { myself.newAnnouncementSuccessPopup.cancel(); };
+    this.newAnnouncementSuccessPopup.add(okButton);
+
+    // popup
+    this.newAnnouncementSuccessPopup.drawNew();
+    this.newAnnouncementSuccessPopup.fixLayout();
+    this.newAnnouncementSuccessPopup.popUp(world);
+
+};
 
 
 
