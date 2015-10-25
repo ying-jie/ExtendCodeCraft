@@ -1783,7 +1783,11 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
 
     //sharer.socket.emit('join', {id: tempIdentifier, room: room });
     //console.log(tempIdentifier +": join room " + room);
-
+    // sharer.socket.on('NEW_ANNOUNCEMENT', function(data) {
+    //     myself.showAnnouncementReceived();//to be implement
+    //     console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data))
+    // });
+    
     sharer.socket.on('NEW_MEMBER_JOINED', function(data) {
         console.log("[SOCKET-RECEIVE] NEW_MEMBER_JOINED: " + JSON.stringify(data))
     });
