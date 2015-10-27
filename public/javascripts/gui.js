@@ -3281,7 +3281,7 @@ IDE_Morph.prototype.allCloseAnnouncementPopup = function(data) {
     this.allClosePopup.createLabel();
 
     // success message
-    txt = new TextMorph(The announcement: " + data.title + " :\"" data.content + "\" has been viewed by all members!");
+    txt = new TextMorph("The announcement: " + data.title + " :\"" + data.content + "\" has been viewed by all members!");
     txt.setWidth(300);
     txt.setCenter(this.allClosePopup.center());
     txt.setTop(this.allClosePopup.top() + 40);
