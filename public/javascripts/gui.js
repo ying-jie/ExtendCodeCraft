@@ -1807,8 +1807,10 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
     })
 
     sharer.socket.on('NEW_ANNOUNCEMENT', function(data){
-        myself.receiveAnnouncementPopup(data);
-        console.log("[SOCKET-RECEIVE] INVITE_JOIN: " + JSON.stringify(data));
+        if ((data.room == myself.shareboxId) && (data.ownerId != tempIdentifier)) {
+            myself.receiveAnnouncementPopup(data);
+            console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data));
+        }
     })
 
     sharer.socket.on('DISBAND_SHAREBOX', function(data){
@@ -3113,7 +3115,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
             if (this.txt) {
                 this.txt.destroy();
             }
-            this.txt = new TextMorph("Usernames are at least 5 characters.");
+            this.txt = new TextMorph("titles are at least 5 characters.");
             this.txt.setColor(txtColor);
             this.txt.setCenter(myself.newAnnouncementPopup.center());
             this.txt.setTop(postButton.bottom() + 20);
@@ -3128,7 +3130,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
             if (this.txt) {
                 this.txt.destroy();
             }
-            this.txt = new TextMorph("Usernames can't exceed 20 characters.");
+            this.txt = new TextMorph("Titles can't exceed 20 characters.");
             this.txt.setColor(txtColor);
             this.txt.setCenter(myself.newAnnouncementPopup.center());
             this.txt.setTop(postButton.bottom() + 20);
@@ -3142,9 +3144,9 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
             // this result value is returned from an internal add member function (NOT ADDED YET)
             //var result = "group_full"; // EITHER: success, connection_error, user_offline, user_nonexistent, user_has_group, group_full
 
-            var result = "success"
+            var result = "success";
             if (result === "success") {
-                socketData = { room: myself.shareboxId, title: title, content: content};
+                socketData = { room: myself.shareboxId, title: title, content: content, ownerId: tempIdentifier};
                 myself.sharer.socket.emit('NEW_ANNOUNCEMENT', { room: myself.shareboxId, title: title, content: content, ownerId: tempIdentifier});
                 console.log("[SOCKET-SEND] NEW_ANNOUNCEMENT: " + JSON.stringify(socketData));
                 myself.newAnnouncementPopup.cancel();

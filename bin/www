@@ -40,13 +40,14 @@ var map ={};
 io.sockets.on('connection', function(socket){
 
 
-		socket.on('NEW_ANNOCEMENT', function(data){
+		socket.on('NEW_ANNOUNCEMENT', function(data){
 			// if no
-			if(!_.isUndefined(clients[data.room])){
+			console.log("here!!!!!!");
+			if(!(_.isUndefined(clients[data.room]))){
 				console.log(data.room+"send new announcemnt");
-				io.to(data.room).emit('NEW_ANNOCEMENT', data);
+				io.to(data.room).emit('NEW_ANNOUNCEMENT', data);
 			}
-
+			io.emit('SOCKET_CONTROL_UPDATE', clients);
 
 		})
 		
