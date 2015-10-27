@@ -1789,11 +1789,7 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
 
     //sharer.socket.emit('join', {id: tempIdentifier, room: room });
     //console.log(tempIdentifier +": join room " + room);
-    // sharer.socket.on('NEW_ANNOUNCEMENT', function(data) {
-    //     myself.showAnnouncementReceived();//to be implement
-    //     console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data))
-    // });
-    
+
     sharer.socket.on('NEW_MEMBER_JOINED', function(data) {
         console.log("[SOCKET-RECEIVE] NEW_MEMBER_JOINED: " + JSON.stringify(data))
     });
@@ -3205,11 +3201,11 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     this.announcementPopup.add(button);
 
     // add title
-    this.announcementPopup.labelString = "New Announcement: " + title + " received!";
+    this.announcementPopup.labelString = "New Announcement: " + data.title + " received!";
     this.announcementPopup.createLabel();
 
     // success message
-    txt = new TextMorph("You've sent the announcement: " + title + " to all group members. \n\n You will receive notification once all members \nhave read the announcement.");
+    txt = new TextMorph(data.ownerId + " says:\n" + data.content + ".");
     txt.setWidth(300);
     txt.setCenter(this.announcementPopup.center());
     txt.setTop(this.announcementPopup.top() + 40);
