@@ -1474,7 +1474,7 @@ IDE_Morph.prototype.createCorral = function () {
 // ****************************
 
 // xinni: "settings" and "add member" buttons on the title bar.
-IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
+IDE_Morph.prototype.createShareBoxTitleBarButtons = function (isOwner) {
 
     // destroy if already exists
     if (this.shareBoxTitleBarButtons) {
@@ -1517,28 +1517,32 @@ IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
     button.fixLayout();
     shareBoxAddMemberButton = button;
 
-    // post annoucement button
-    button = new PushButtonMorph(
-        this,
-        'createAnnouncementPopup',
-        (String.fromCharCode("0xf14b")),
-        null,
-        null,
-        null,
-        "iconButton"
-    );
-    button.drawNew();
-    button.hint = 'New Announcement'
-    button.fixLayout();
-    newAnnouncementButton = button;
+    if (isOwner) {
+        // post annoucement button
+        button = new PushButtonMorph(
+            this,
+            'createAnnouncementPopup',
+            (String.fromCharCode("0xf14b")),
+            null,
+            null,
+            null,
+            "iconButton"
+        );
+        button.drawNew();
+        button.hint = 'New Announcement'
+        button.fixLayout();
+        newAnnouncementButton = button;
+    }
 
     // add to title bar
     this.shareBoxTitleBarButtons.add(shareBoxSettingsButton);
     this.shareBoxTitleBarButtons.shareBoxSettingsButton = shareBoxSettingsButton;
     this.shareBoxTitleBarButtons.add(shareBoxAddMemberButton);
     this.shareBoxTitleBarButtons.shareBoxAddMemberButton = shareBoxAddMemberButton;
-    this.shareBoxTitleBarButtons.add(newAnnouncementButton);
-    this.shareBoxTitleBarButtons.newAnnouncementButton = newAnnouncementButton;
+    if (isOwner) {
+        this.shareBoxTitleBarButtons.add(newAnnouncementButton);
+        this.shareBoxTitleBarButtons.newAnnouncementButton = newAnnouncementButton;
+    }
 
     // position buttons
     if (this.shareBoxTitleBarButtons) {
@@ -1550,9 +1554,11 @@ IDE_Morph.prototype.createShareBoxTitleBarButtons = function () {
         this.shareBoxTitleBarButtons.shareBoxSettingsButton.setTop(this.shareBoxTitleBarButtons.top() + 2);
         this.shareBoxTitleBarButtons.shareBoxSettingsButton.setLeft(this.shareBoxTitleBarButtons.shareBoxAddMemberButton.right());
 
-        // position post announcement button
-        this.shareBoxTitleBarButtons.newAnnouncementButton.setTop(this.shareBoxTitleBarButtons.top() + 2);
-        this.shareBoxTitleBarButtons.newAnnouncementButton.setLeft(this.shareBoxTitleBarButtons.shareBoxSettingsButton.right());
+        if (isOwner) {
+            // position post announcement button
+            this.shareBoxTitleBarButtons.newAnnouncementButton.setTop(this.shareBoxTitleBarButtons.top() + 2);
+            this.shareBoxTitleBarButtons.newAnnouncementButton.setLeft(this.shareBoxTitleBarButtons.shareBoxSettingsButton.right());
+        }
     }
 
     this.fixLayout();
@@ -1798,6 +1804,11 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
             myself.showRequestReceivedMessage(data);
             console.log("[SOCKET-RECEIVE] INVITE_JOIN: " + JSON.stringify(data));
         }
+    })
+
+    sharer.socket.on('NEW_ANNOUNCEMENT', function(data){
+        myself.receiveAnnouncementPopup(data);
+        console.log("[SOCKET-RECEIVE] INVITE_JOIN: " + JSON.stringify(data));
     })
 
     sharer.socket.on('DISBAND_SHAREBOX', function(data){
@@ -2191,7 +2202,7 @@ IDE_Morph.prototype.showEntireShareBoxComponent = function(isOwner) {
         myself.createShareBoxBar();
         // create title bar buttons
         myself.createShareBoxTitleBar();
-        myself.createShareBoxTitleBarButtons();
+        myself.createShareBoxTitleBarButtons(isOwner);
         myself.createShareBox();
         
         myself.fixLayout();
@@ -2208,7 +2219,7 @@ IDE_Morph.prototype.showEntireShareBoxComponent = function(isOwner) {
         myself.createShareBoxBar();
         // create title bar buttons
         myself.createShareBoxTitleBar();
-        myself.createShareBoxTitleBarButtons();
+        myself.createShareBoxTitleBarButtons(isOwner);
         myself.createShareBox();
         
         myself.fixLayout();
@@ -3155,12 +3166,73 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
     this.newAnnouncementPopup.popUp(world);
 };
 
+// yiran: Popup when member receive new announcement
+IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
+    var world = this.world();
+    var myself = this;
+    var popupWidth = 400;
+    var popupHeight = 300;
+
+    if (this.announcementPopup) {
+        this.announcementPopup.destroy();
+    }
+
+    this.announcementPopup = new DialogBoxMorph();
+    this.announcementPopup.setExtent(new Point(popupWidth, popupHeight));
+
+    // close dialog button
+    button = new PushButtonMorph(
+        this,
+        null,
+        (String.fromCharCode("0xf00d")),
+        null,
+        null,
+        null,
+        "redCircleIconButton"
+    );
+    button.setRight(this.announcementPopup.right() - 3);
+    button.setTop(this.announcementPopup.top() + 2);
+    button.action = function () { 
+        myself.announcementPopup.cancel(); 
+        alert("closed");
+    };
+    button.drawNew();
+    button.fixLayout();
+    this.announcementPopup.add(button);
+
+    // add title
+    this.announcementPopup.labelString = "New Announcement: " + title + " received!";
+    this.announcementPopup.createLabel();
+
+    // success message
+    txt = new TextMorph("You've sent the announcement: " + title + " to all group members. \n\n You will receive notification once all members \nhave read the announcement.");
+    txt.setWidth(300);
+    txt.setCenter(this.announcementPopup.center());
+    txt.setTop(this.announcementPopup.top() + 40);
+    this.announcementPopup.add(txt);
+    txt.drawNew();
+
+    // "got it!" button, closes the dialog.
+    okButton = new PushButtonMorph(null, null, "Got it!", null, null, null, "green");
+    okButton.setCenter(this.announcementPopup.center());
+    okButton.setBottom(this.announcementPopup.bottom() - 10);
+    okButton.action = function() { 
+        myself.announcementPopup.cancel(); 
+        alert("closed by button");
+    };
+    this.announcementPopup.add(okButton);
+
+    // popup
+    this.announcementPopup.drawNew();
+    this.announcementPopup.fixLayout();
+    this.announcementPopup.popUp(world);
+};
 
 
 
 
 
-// notifies the owner that new announcement has been posted successfully.
+// yiran: notifies the owner that new announcement has been posted successfully.
 IDE_Morph.prototype.showNewAnnouncementSuccessPopup = function(title) {
     var world = this.world();
     var myself = this;
@@ -4865,7 +4937,7 @@ IDE_Morph.prototype.fixLayout = function (situation) {
     var shareBoxInternalLeftPadding = 6;
 
     // heights and widths
-    var shareBoxTitleBarButtonsWidth = 150;
+    var shareBoxTitleBarButtonsWidth = 140;
     var shareBoxTitleBarHeight = 30;
     var corralBarHeight = 90;
 
