@@ -58,11 +58,12 @@ io.sockets.on('connection', function(socket){
 		
 		//data here need include shareboxid：data.room, owerid, announcementid
 		socket.on('CLOSE_ANNOUNCEMENT', function(data){
+			console.log("here!!!!");
 			if(!(_.isUndefined(clients[data.room]))){
 					map[data.room].count++;
 				//all the members have read the announcemnt
 
-				if(map[data.room].count==clients[data.room].members.size()-1){
+				if(map[data.room].count==clients[data.room].members.length - 1){
 					io.to(data.room).emit('ALL_CLOSE_ANNOUNCEMENT', {title:map[data.room].title, content: map[data.room].content, ownerId:data.room, room:data.room});
 					io.emit('SOCKET_CONTROL_UPDATE', clients);	
 				}
