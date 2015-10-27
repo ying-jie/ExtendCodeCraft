@@ -35,8 +35,36 @@ server.on('listening', onListening);
 var io = require('socket.io')(server);
 
 var clients = {}
+var map ={};
 
 io.sockets.on('connection', function(socket){
+
+
+		socket.on('NEW_ANNOCEMENT', function(data){
+			// if no
+			if(!_.isUndefined(clients[data.room])){
+				console.log(data.room+"send new announcemnt");
+				io.to(data.room).emit('NEW_ANNOCEMENT', data);
+			}
+
+
+		})
+		
+		//data here need include shareboxid：data.room, owerid, announcementid
+		socket.on('CLOSE_ANNOCEMENT', function(data){
+			if(!(_.isUndefined(clients[data.room]))){
+				if(data.announcemnt_id in map)
+					map[data.announcemnt_id]++;
+				else
+					map[data.announcemnt_id]=1;
+				//all the members have read the announcemnt
+				if(map[data.announcemnt_id]==clients[data.room].members.size()){
+					io.to(data.room).emit('UPDATE_ANNOUNCEMENT_VIEW', data);
+					io.emit('SOCKET_CONTROL_UPDATE', clients);	
+				}
+			}
+		
+		})
 
 		socket.on('SEND_ITEM', function(data){
 			if(!(_.isUndefined(clients[data.room]))){
