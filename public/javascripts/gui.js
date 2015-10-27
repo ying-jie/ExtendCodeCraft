@@ -1806,10 +1806,19 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
         }
     })
 
+    // yiran
     sharer.socket.on('NEW_ANNOUNCEMENT', function(data){
         if ((data.room == myself.shareboxId) && (data.ownerId != tempIdentifier)) {
             myself.receiveAnnouncementPopup(data);
             console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data));
+        }
+    })
+
+    // yiran
+    sharer.socket.on('ALL_CLOSE_ANNOUNCEMENT', function(data){
+        if ((data.room == myself.shareboxId) && (data.ownerId == tempIdentifier)) {
+            myself.allCloseAnnouncementPopup(data);
+            console.log("[SOCKET-RECEIVE] ALL_CLOSE_ANNOUNCEMENT: " + JSON.stringify(data));
         }
     })
 
@@ -3194,9 +3203,11 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     );
     button.setRight(this.announcementPopup.right() - 3);
     button.setTop(this.announcementPopup.top() + 2);
-    button.action = function () { 
-        myself.announcementPopup.cancel(); 
-        alert("closed");
+    button.action = function () {  
+        socketData = { room: myself.shareboxId, title: data.title};
+        myself.sharer.socket.emit('CLOSE_ANNOUNCEMENT', { room: myself.shareboxId, title: data.title});
+        console.log("[SOCKET-SEND] CLOSE_ANNOUNCEMENT: " + JSON.stringify(socketData));
+        myself.announcementPopup.cancel();
     };
     button.drawNew();
     button.fixLayout();
@@ -3219,8 +3230,10 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     okButton.setCenter(this.announcementPopup.center());
     okButton.setBottom(this.announcementPopup.bottom() - 10);
     okButton.action = function() { 
-        myself.announcementPopup.cancel(); 
-        alert("closed by button");
+        socketData = { room: myself.shareboxId, title: data.title};
+        myself.sharer.socket.emit('CLOSE_ANNOUNCEMENT', { room: myself.shareboxId, title: data.title});
+        console.log("[SOCKET-SEND] CLOSE_ANNOUNCEMENT: " + JSON.stringify(socketData));
+        myself.announcementPopup.cancel();
     };
     this.announcementPopup.add(okButton);
 
@@ -3230,6 +3243,65 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     this.announcementPopup.popUp(world);
 };
 
+// yiran: Popup to the owner when all members have closed the announcement
+IDE_Morph.prototype.allCloseAnnouncementPopup = function(data) {
+    var world = this.world();
+    var myself = this;
+    var popupWidth = 400;
+    var popupHeight = 300;
+
+    if (this.allClosePopup) {
+        this.allClosePopup.destroy();
+    }
+
+    this.allClosePopup = new DialogBoxMorph();
+    this.allClosePopup.setExtent(new Point(popupWidth, popupHeight));
+
+    // close dialog button
+    button = new PushButtonMorph(
+        this,
+        null,
+        (String.fromCharCode("0xf00d")),
+        null,
+        null,
+        null,
+        "redCircleIconButton"
+    );
+    button.setRight(this.allClosePopup.right() - 3);
+    button.setTop(this.allClosePopup.top() + 2);
+    button.action = function () {  
+        myself.allClosePopup.cancel();
+    };
+    button.drawNew();
+    button.fixLayout();
+    this.allClosePopup.add(button);
+
+    // add title
+    this.allClosePopup.labelString = "Announcement Viewed";
+    this.allClosePopup.createLabel();
+
+    // success message
+    txt = new TextMorph(The announcement: " + data.title + " :\"" data.content + "\" has been viewed by all members!");
+    txt.setWidth(300);
+    txt.setCenter(this.allClosePopup.center());
+    txt.setTop(this.allClosePopup.top() + 40);
+    this.allClosePopup.add(txt);
+    txt.drawNew();
+
+    // "got it!" button, closes the dialog.
+    okButton = new PushButtonMorph(null, null, "Got it!", null, null, null, "green");
+    okButton.setCenter(this.allClosePopup.center());
+    okButton.setBottom(this.allClosePopup.bottom() - 10);
+    okButton.action = function() { 
+        myself.allClosePopup.cancel(); 
+    };
+    this.allClosePopup.add(okButton);
+
+    // popup
+    this.allClosePopup.drawNew();
+    this.allClosePopup.fixLayout();
+    this.allClosePopup.popUp(world);
+};
 
 
 
