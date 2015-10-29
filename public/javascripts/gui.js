@@ -1807,20 +1807,33 @@ IDE_Morph.makeSocket = function (myself, shareboxId) {
     })
 
     // yiran
+    // sharer.socket.on('NEW_ANNOUNCEMENT', function(data){
+    //     if ((data.room == myself.shareboxId) && (data.ownerId != tempIdentifier)) {
+    //         myself.receiveAnnouncementPopup(data);
+    //         console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data));
+    //     }
+    // })
     sharer.socket.on('NEW_ANNOUNCEMENT', function(data){
         if ((data.room == myself.shareboxId) && (data.ownerId != tempIdentifier)) {
-            myself.receiveAnnouncementPopup(data);
             console.log("[SOCKET-RECEIVE] NEW_ANNOUNCEMENT: " + JSON.stringify(data));
+            alert(data.content+"!");
+            sharer.socket.emit('CLOSE_ANNOUNCEMENT', { room: myself.shareboxId, title: data.title});
         }
     })
-
-    // yiran
     sharer.socket.on('ALL_CLOSE_ANNOUNCEMENT', function(data){
         if ((data.room == myself.shareboxId) && (data.ownerId == tempIdentifier)) {
-            myself.allCloseAnnouncementPopup(data);
+             alert("All member have read the announments!");
             console.log("[SOCKET-RECEIVE] ALL_CLOSE_ANNOUNCEMENT: " + JSON.stringify(data));
+            
         }
     })
+    // yiran
+    // sharer.socket.on('ALL_CLOSE_ANNOUNCEMENT', function(data){
+    //     if ((data.room == myself.shareboxId) && (data.ownerId == tempIdentifier)) {
+    //         myself.allCloseAnnouncementPopup(data);
+    //         console.log("[SOCKET-RECEIVE] ALL_CLOSE_ANNOUNCEMENT: " + JSON.stringify(data));
+    //     }
+    // })
 
     sharer.socket.on('DISBAND_SHAREBOX', function(data){
         myself.showYouHaveBeenRemovedPopup();
