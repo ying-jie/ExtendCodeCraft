@@ -3059,7 +3059,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
     var world = this.world();
     var myself = this;
     var popupWidth = 400;
-    var popupHeight = 400;
+    var popupHeight = 200;
 
     if (this.newAnnouncementPopup) {
         this.newAnnouncementPopup.destroy();
@@ -3094,12 +3094,10 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
     announcementTitle.typeInPadding = 4;
     announcementTitle.fixLayout();
     announcementTitle.drawNew();
-    this.newAnnouncementPopup.add(announcementTitle);
-
+    
     // the Announcement Content input box
     var announcementContent = new InputFieldMorph();
     announcementContent.setWidth(200);
-    announcementContent.silentSetHeight(150);
     announcementContent.setCenter(myself.newAnnouncementPopup.center());
     announcementContent.setTop(announcementTitle.bottom() + 10);
     announcementContent.fontSize = 15;
@@ -3107,6 +3105,21 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
     announcementContent.fixLayout();
     announcementContent.drawNew();
     this.newAnnouncementPopup.add(announcementContent);
+    this.newAnnouncementPopup.add(announcementTitle);
+
+    // add title label
+    titletxt = new TextMorph("Title: ");
+    titletxt.setRight(announcementTitle.left());
+    titletxt.setTop(myself.newAnnouncementPopup.top() + 55);
+    this.newAnnouncementPopup.add(titletxt);
+    titletxt.drawNew();
+
+    // add content label
+    contenttxt = new TextMorph("Content: ");
+    contenttxt.setRight(announcementContent.left());
+    contenttxt.setTop(announcementTitle.bottom() + 15);
+    this.newAnnouncementPopup.add(contenttxt);
+    contenttxt.drawNew();
 
     // "Add" Button
     postButton = new PushButtonMorph(null, null, "Post this Announcement", null, null, null, "green");
@@ -3127,7 +3140,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
             this.txt = new TextMorph("titles are at least 5 characters.");
             this.txt.setColor(txtColor);
             this.txt.setCenter(myself.newAnnouncementPopup.center());
-            this.txt.setTop(postButton.bottom() + 20);
+            this.txt.setTop(postButton.bottom() + 10);
             myself.newAnnouncementPopup.add(this.txt);
             this.txt.drawNew();
             myself.newAnnouncementPopup.fixLayout();
@@ -3142,7 +3155,7 @@ IDE_Morph.prototype.createAnnouncementPopup = function() {
             this.txt = new TextMorph("Titles can't exceed 20 characters.");
             this.txt.setColor(txtColor);
             this.txt.setCenter(myself.newAnnouncementPopup.center());
-            this.txt.setTop(postButton.bottom() + 20);
+            this.txt.setTop(postButton.bottom() + 10);
             myself.newAnnouncementPopup.add(this.txt);
             this.txt.drawNew();
             myself.newAnnouncementPopup.fixLayout();
@@ -3182,7 +3195,7 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     var world = this.world();
     var myself = this;
     var popupWidth = 400;
-    var popupHeight = 300;
+    var popupHeight = 200;
 
     if (this.announcementPopup) {
         this.announcementPopup.destroy();
@@ -3214,11 +3227,11 @@ IDE_Morph.prototype.receiveAnnouncementPopup = function(data) {
     this.announcementPopup.add(button);
 
     // add title
-    this.announcementPopup.labelString = "New Announcement: " + data.title + " received!";
+    this.announcementPopup.labelString = "New Announcement Received!";
     this.announcementPopup.createLabel();
 
     // success message
-    txt = new TextMorph(data.ownerId + " says:\n" + data.content + ".");
+    txt = new TextMorph(data.ownerId + " send you a message:\n\n" + "Title: " + data.title + "\nContent: " + data.content);
     txt.setWidth(300);
     txt.setCenter(this.announcementPopup.center());
     txt.setTop(this.announcementPopup.top() + 40);
@@ -3248,7 +3261,7 @@ IDE_Morph.prototype.allCloseAnnouncementPopup = function(data) {
     var world = this.world();
     var myself = this;
     var popupWidth = 400;
-    var popupHeight = 300;
+    var popupHeight = 200;
 
     if (this.allClosePopup) {
         this.allClosePopup.destroy();
@@ -3281,7 +3294,7 @@ IDE_Morph.prototype.allCloseAnnouncementPopup = function(data) {
     this.allClosePopup.createLabel();
 
     // success message
-    txt = new TextMorph("The announcement: " + data.title + " :\"" + data.content + "\" has been viewed by all members!");
+    txt = new TextMorph("The announcement with title: \'" + data.title + "\" \nand content: \"" + data.content + "\"\nhas been viewed by all members!");
     txt.setWidth(300);
     txt.setCenter(this.allClosePopup.center());
     txt.setTop(this.allClosePopup.top() + 40);
